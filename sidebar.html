@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+      body { font-family: 'Roboto', sans-serif; padding: 15px; background-color: #f8f9fa; color: #3c4043; }
+      #system-status { background-color: #fff3cd; color: #856404; padding: 8px; font-size: 11px; text-align: center; border-radius: 4px; margin-bottom: 15px; border: 1px solid #ffeeba; display: none; }
+      .tabs { display: flex; border-bottom: 2px solid #dadce0; margin-bottom: 15px; }
+      .tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; font-weight: 500; color: #5f6368; border-bottom: 2px solid transparent; transition: all 0.2s; font-size: 13px; user-select: none; }
+      .tab:hover { color: #188038; background: #e8f5e9; }
+      .tab.active { color: #188038; border-bottom: 2px solid #188038; font-weight: bold; }
+      .tab-content { display: none; }
+      .tab-content.active { display: block; animation: fadeIn 0.3s; }
+      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+      .form-group { margin-bottom: 12px; position: relative; } 
+      label { display: block; font-weight: 500; font-size: 12px; margin-bottom: 4px; color: #5f6368; }
+      input, select, textarea { width: 100%; padding: 8px; border: 1px solid #dadce0; border-radius: 4px; box-sizing: border-box; font-size: 14px; font-family: 'Roboto', sans-serif; }
+      input:focus, select:focus, textarea:focus { outline: none; border-color: #1a73e8; border-width: 2px; padding: 7px; }
+      .suggestions-box { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #dadce0; border-top: none; border-radius: 0 0 4px 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1000; max-height: 200px; overflow-y: auto; display: none; }
+      .suggestion-item { padding: 10px; cursor: pointer; font-size: 13px; color: #202124; border-bottom: 1px solid #f1f3f4; display: flex; align-items: center; }
+      .suggestion-item:last-child { border-bottom: none; }
+      .suggestion-item:hover { background-color: #e8f0fe; color: #1a73e8; }
+      .btn { border: none; padding: 10px; width: 100%; font-weight: bold; border-radius: 4px; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: opacity 0.2s; }
+      .btn:hover { opacity: 0.9; }
+      .btn:disabled { background-color: #ccc !important; cursor: not-allowed; }
+      .btn-primary { background-color: #1a73e8; color: white; padding: 12px; font-size: 14px; text-transform: uppercase; margin-bottom: 15px; }
+      .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+      .btn-secondary { background-color: #f1f3f4; color: #3c4043; border: 1px solid #dadce0; font-weight: 500; font-size: 11px; }
+      .btn-secondary:hover { background-color: #e8eaed; }
+      .btn-save { background-color: #188038; color: white; margin-top: 10px; } 
+      .btn-manage { background-color: #fff; color: #5f6368; border: 1px solid #dadce0; margin-top: 5px; }
+      .btn-manage:hover { background-color: #f8f9fa; border-color: #1a73e8; }
+      .divider { margin: 25px 0 15px 0; border-top: 1px solid #dadce0; text-align: center; position: relative; }
+      .divider span { background-color: #f8f9fa; padding: 0 10px; color: #5f6368; font-size: 12px; position: relative; top: -8px; font-weight: 500; }
+    </style>
+  </head>
+  <body>
+    <!-- NAVEGAÇÃO -->
+    <div class="tabs">
+      <div id="tab-btn-cadastro" class="tab active" onclick="switchTab(this, 'cadastro')">📝 Novo Lead</div>
+      <div id="tab-btn-update" class="tab" onclick="switchTab(this, 'update')">🔄 Atualizar</div>
+    </div>
+
+    <!-- ABA 1: CADASTRO -->
+    <div id="content-cadastro" class="tab-content active">
+      <form id="leadForm" onsubmit="handleFormSubmit(this)">
+        <div class="form-group"><label>Nome do Contato *</label><input type="text" name="nome" required placeholder="Ex: João Silva"></div>
+        <div class="form-group"><label>Nome da Empresa *</label><input type="text" name="empresa" required placeholder="Ex: Padaria Central"></div>
+        <div class="form-group"><label>Telefone</label><input type="text" name="telefone" placeholder="(XX) 9XXXX-XXXX"></div>
+        
+        <!-- CATEGORIA EXPANDIDA E ORGANIZADA -->
+        <div class="form-group"><label>🏷️ Categoria (Nicho)</label>
+          <select name="categoria">
+            <option value="">-- Selecione --</option>
+            <optgroup label="Alto Valor & Serviços">
+              <option value="Advocacia">⚖️ Advocacia</option>
+              <option value="Arquitetura & Interiores">🏛️ Arquitetura & Interiores</option>
+              <option value="Contabilidade">📉 Contabilidade</option>
+              <option value="Consultoria Financeira">💰 Consultoria Financeira</option>
+              <option value="Corretoras de Seguros">🛡️ Corretoras de Seguros</option>
+              <option value="Energia Solar">☀️ Energia Solar</option>
+              <option value="Imóveis">🏠 Imóveis (Alto Padrão)</option>
+            </optgroup>
+            <optgroup label="Saúde & Estética">
+              <option value="Harmonização">💉 Harmonização</option>
+              <option value="Odonto Premium">🦷 Odonto Premium</option>
+              <option value="Médicos Especialistas">🩺 Médicos Especialistas</option>
+              <option value="Farmácias de Manipulação">💊 Farmácias de Manipulação</option>
+              <option value="Óticas">👓 Óticas</option>
+              <option value="Beleza Express">💅 Beleza Express</option>
+              <option value="Barbearia">💈 Barbearia</option>
+              <option value="Fitness">💪 Fitness</option>
+            </optgroup>
+            <optgroup label="Comércio & Varejo">
+              <option value="Revenda de Carros">🚗 Revenda de Carros</option>
+              <option value="Moda">👗 Moda</option>
+              <option value="Mercados">🛒 Mercados</option>
+              <option value="Lojas Locais">🛍️ Lojas Locais</option>
+              <option value="Pet">🐾 Pet</option>
+            </optgroup>
+            <optgroup label="Serviços & Lazer">
+              <option value="Gastronomia">🍔 Gastronomia</option>
+              <option value="Delivery de Nicho">🛵 Delivery de Nicho</option>
+              <option value="Eventos & Festas">🎉 Eventos & Festas</option>
+              <option value="Turismo & Viagens">✈️ Turismo & Viagens</option>
+              <option value="Educação">🎓 Educação</option>
+              <option value="Estética Automotiva">🧼 Estética Automotiva</option>
+              <option value="Oficinas Mecânicas">🔧 Oficinas Mecânicas</option>
+              <option value="Serviços Casa">🛠️ Serviços Casa</option>
+              <option value="Tatuagem & Piercing">✒️ Tatuagem & Piercing</option>
+            </optgroup>
+            <option value="Outros">🌐 Outros</option>
+          </select>
+        </div>
+
+        <div class="form-group"><label>E-mail</label><input type="email" name="email"></div>
+        <div class="form-group"><label>Estado (UF)</label><input type="text" name="cidadeEstado"></div>
+        <div class="form-group"><label>Anotação</label><textarea name="oQuePrecisa" rows="2"></textarea></div>
+        <div class="form-group"><label>Valor (R$)</label><input type="text" name="valor"></div>
+        
+        <div class="form-group"><label>Fonte</label>
+          <select name="fonte">
+            <option value="Prospecção Ativa">Prospecção Ativa</option>
+            <option value="Indicação">Indicação</option>
+            <option value="Instagram">Instagram</option>
+            <option value="Facebook">Facebook</option>
+            <option value="Google Ads">Google Ads</option>
+            <option value="Google Meu Negócio">Google Meu Negócio</option>
+            <option value="Outros">Outros</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Próximo Passo</label><input type="text" name="proximoPasso" value="Ligar"></div>
+        <div class="form-group"><label>Link Instagram</label><input type="text" name="linkInstagram"></div>
+        <div class="form-group"><label>Link Maps</label><input type="text" name="linkGmb"></div>
+        <button type="submit" id="btnSalvar" class="btn btn-save">💾 SALVAR</button>
+      </form>
+    </div>
+
+    <!-- ABA 2: ATUALIZAÇÃO -->
+    <div id="content-update" class="tab-content">
+      <div style="text-align: center; margin-bottom: 15px; color: #5f6368; font-size: 13px;">Busque e selecione para editar.</div>
+      <div class="form-group">
+        <label>🔍 Pesquisar Lead</label>
+        <input type="text" id="inputBuscaLead" placeholder="Nome ou empresa..." autocomplete="off" oninput="filtrarSugestoes('update')" onfocus="iniciarCargaDeDados()">
+        <div id="boxSugestoesUpdate" class="suggestions-box"></div>
+        <input type="hidden" id="idLeadSelecionado">
+      </div>
+      
+      <div class="form-group"><label>📊 Status</label>
+        <select id="novoStatus">
+          <option value="">-- Selecione --</option>
+          <option value="Prospecção">🟢 Prospecção</option>
+          <option value="Contato Feito">📞 Contato Feito</option>
+          <option value="Em Negociação">🤝 Em Negociação</option>
+          <option value="Ganho">🏆 Ganho</option>
+          <option value="Perdido">❌ Perdido</option>
+        </select>
+      </div>
+      <div class="form-group"><label>👣 Próximo Passo</label><input type="text" id="inputProximoPassoUpdate"></div>
+      <div class="form-group"><label>📅 Data (Vazio = Agora)</label><input type="datetime-local" id="dataInteracao"></div>
+      
+      <button type="button" class="btn btn-primary" onclick="atualizarLead('tudo')"><i class="fas fa-rocket"></i> Atualizar Tudo</button>
+      <div class="action-grid">
+        <button type="button" class="btn btn-secondary" onclick="atualizarLead('status')">📊 Apenas Status</button>
+        <button type="button" class="btn btn-secondary" onclick="atualizarLead('proxPasso')">👣 Apenas Próx. Passo</button>
+      </div>
+      <button type="button" class="btn btn-secondary" style="width: 100%; margin-top: 0;" onclick="atualizarLead('data')">📅 Registrar Apenas Data</button>
+      <div id="msgUpdate" style="display:none; color:#e37400; text-align:center; margin-top:10px;">Atualizado!</div>
+    </div>
+
+    <!-- GESTÃO -->
+    <div class="divider"><span>⚙️ GESTÃO</span></div>
+    <button type="button" id="btnOrganizar" class="btn btn-manage" onclick="organizarTabela()">🧹 Organizar por Status</button>
+    <button type="button" id="btnProcessar" class="btn btn-manage" onclick="processarFechamento()">📥 Processar Fechamento</button>
+
+    <script>
+      function switchTab(clickedTab, tabName) {
+        try {
+          var contents = document.querySelectorAll('.tab-content');
+          contents.forEach(function(el) { el.classList.remove('active'); });
+          var tabs = document.querySelectorAll('.tab');
+          tabs.forEach(function(el) { el.classList.remove('active'); });
+          
+          document.getElementById('content-' + tabName).classList.add('active');
+          if(clickedTab) clickedTab.classList.add('active');
+          
+          if(tabName !== 'cadastro') { setTimeout(function() { try { iniciarCargaDeDados(); } catch(e) {} }, 10); }
+        } catch(e) { console.error("Erro abas:", e); }
+      }
+
+      function handleFormSubmit(formObject) {
+        if (typeof google === 'undefined') { alert("Modo Simulação: Salvo!"); return; }
+        event.preventDefault(); 
+        const btn = document.getElementById('btnSalvar'); 
+        btn.disabled = true; btn.textContent = "Salvando...";
+        
+        const dados = {
+          nome: formObject.nome.value, empresa: formObject.empresa.value, email: formObject.email.value,
+          telefone: formObject.telefone.value, cidadeEstado: formObject.cidadeEstado.value,
+          oQuePrecisa: formObject.oQuePrecisa.value, valor: formObject.valor.value, fonte: formObject.fonte.value,
+          proximoPasso: formObject.proximoPasso.value, linkGmb: formObject.linkGmb.value,
+          linkInstagram: formObject.linkInstagram.value,
+          categoria: formObject.categoria.value 
+        };
+        google.script.run.withSuccessHandler(() => {
+          document.getElementById('leadForm').reset(); btn.disabled = false; btn.textContent = "💾 SALVAR";
+          alert("Lead salvo com sucesso!");
+        }).withFailureHandler((erro) => { alert("Erro: " + erro.message); btn.disabled = false; btn.textContent = "TENTAR"; }).processarFormulario(dados);
+      }
+
+      let leadsCarregados = []; let dadosCarregados = false; 
+      function iniciarCargaDeDados() {
+        if (dadosCarregados) return;
+        if (typeof google === 'undefined') { leadsCarregados = [{id:1, texto:"Teste", statusAtual:"Prospecção"}]; dadosCarregados = true; return; }
+        const inputUpdate = document.getElementById('inputBuscaLead');
+        if(inputUpdate) inputUpdate.placeholder = "A conectar...";
+        google.script.run.withSuccessHandler((lista) => {
+            leadsCarregados = lista || []; dadosCarregados = true;
+            if(inputUpdate) inputUpdate.placeholder = "Nome ou empresa...";
+          }).withFailureHandler((erro) => { console.error("Falha Google:", erro); }).getListaLeads();
+      }
+      
+      function forcarRecarga() { dadosCarregados = false; iniciarCargaDeDados(); }
+      function normalizar(texto) { return texto ? texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : ""; }
+
+      function filtrarSugestoes(modo) {
+        const input = document.getElementById('inputBuscaLead');
+        const box = document.getElementById('boxSugestoesUpdate');
+        const termo = normalizar(input.value);
+        box.innerHTML = ''; 
+        if (termo.length < 1) { box.style.display = 'none'; return; }
+        if (!dadosCarregados) { iniciarCargaDeDados(); return; } 
+        const sugestoes = leadsCarregados.filter(lead => normalizar(lead.texto).includes(termo));
+        if (sugestoes.length === 0) { box.innerHTML = '<div style="padding:10px;font-size:12px;color:#5f6368;">❌ Nada encontrado.</div>'; box.style.display = 'block'; return; }
+        sugestoes.slice(0, 5).forEach(lead => { 
+          const div = document.createElement('div');
+          div.className = 'suggestion-item';
+          div.innerHTML = `<span>🔍 ${lead.texto.split('|')[0]} </span> <span style="font-size:11px; color:#999;">${lead.texto.split('|')[1] || ''}</span>`;
+          div.onclick = function() { selecionarLeadUpdate(lead); };
+          box.appendChild(div);
+        });
+        box.style.display = 'block';
+      }
+
+      function selecionarLeadUpdate(lead) {
+        const input = document.getElementById('inputBuscaLead');
+        const box = document.getElementById('boxSugestoesUpdate');
+        const selectStatus = document.getElementById('novoStatus');
+        const inputProxPasso = document.getElementById('inputProximoPassoUpdate');
+        const idField = document.getElementById('idLeadSelecionado');
+        input.value = lead.texto.split('|')[0].trim();
+        selectStatus.value = lead.statusAtual;
+        inputProxPasso.value = lead.proxPasso || ""; 
+        idField.value = lead.id;
+        box.style.display = 'none';
+      }
+
+      function atualizarLead(tipoAcao) {
+        if (typeof google === 'undefined') { alert("Modo Simulação: Atualizado!"); return; }
+        let idLead = document.getElementById('idLeadSelecionado').value;
+        const selectStatus = document.getElementById('novoStatus');
+        const inputProxPasso = document.getElementById('inputProximoPassoUpdate');
+        const dataInput = document.getElementById('dataInteracao');
+        const msg = document.getElementById('msgUpdate');
+        
+        if (!idLead) { alert("Selecione um lead da lista."); return; }
+        
+        const botoes = document.querySelectorAll('.btn');
+        botoes.forEach(b => b.disabled = true);
+        
+        let statusParaEnviar = null;
+        let proxPassoParaEnviar = null;
+        const dataParaEnviar = dataInput.value; 
+
+        if (tipoAcao === 'tudo') {
+            statusParaEnviar = selectStatus.value;
+            proxPassoParaEnviar = inputProxPasso.value;
+        } else if (tipoAcao === 'status') {
+            statusParaEnviar = selectStatus.value;
+        } else if (tipoAcao === 'proxPasso') {
+            proxPassoParaEnviar = inputProxPasso.value;
+        } 
+
+        google.script.run.withSuccessHandler((res) => {
+            botoes.forEach(b => b.disabled = false);
+            msg.style.display = 'block';
+            setTimeout(() => msg.style.display = 'none', 3000);
+            dadosCarregados = false; iniciarCargaDeDados();
+          })
+          .withFailureHandler((erro) => { alert("Erro: " + erro.message); botoes.forEach(b => b.disabled = false); })
+          .atualizarStatusLead(idLead, statusParaEnviar, dataParaEnviar, proxPassoParaEnviar);
+      }
+
+      function organizarTabela() {
+        if (typeof google === 'undefined') { alert("Modo Simulação: Organizado!"); return; }
+        const btn = document.getElementById('btnOrganizar'); 
+        const txt = btn.textContent; btn.disabled = true; btn.textContent = "...";
+        google.script.run.withSuccessHandler(() => { btn.disabled = false; btn.textContent = txt; }).withFailureHandler(() => { btn.disabled = false; btn.textContent = txt; }).organizarPorStatus();
+      }
+      function processarFechamento() {
+        if (typeof google === 'undefined') { alert("Modo Simulação: Fechado!"); return; }
+        const btn = document.getElementById('btnProcessar'); const txt = btn.textContent; btn.disabled = true; btn.textContent = "...";
+        google.script.run.withSuccessHandler(() => { btn.disabled = false; btn.textContent = txt; alert("Concluído!"); }).withFailureHandler(() => { btn.disabled = false; btn.textContent = txt; }).moverLeadsFinalizados();
+      }
+    </script>
+  </body>
+</html>
